@@ -1,6 +1,5 @@
 use futures::{
     channel::mpsc::{channel, Receiver, SendError},
-    SinkExt, StreamExt,
 };
 use notify::{Config, Event, FsEventWatcher, RecommendedWatcher, RecursiveMode, Watcher};
 
@@ -114,8 +113,7 @@ impl FsWatchBuilder {
 
 struct FsWatching {
     watch: FsWatch,
-    // watcher: Box<dyn Watcher>
-    // watcher: Foo
+    watcher: Box<dyn Watcher>
 }
 
 
@@ -131,21 +129,10 @@ impl FsWatch {
         };
         watcher.watch(&Path::new(&self.options.path), recursive_mode).map_err(|e| e.to_string())?;
         let boxed = Box::new(watcher);
-        // match watcher.kind() {
-        //     notify::WatcherKind::Fsevent
-        //     notify::WatcherKind::Inotify => todo!(),
-        //     notify::WatcherKind::Kqueue => todo!(),
-        //     notify::WatcherKind::PollWatcher => todo!(),
-        //     notify::WatcherKind::ReadDirectoryChangesWatcher => todo!(),
-        //     notify::WatcherKind::NullWatcher => todo!(),
-        //     _ => todo!(),
-        // }
-        let bwatcher: Box<dyn Watcher> = Box::new(watcher);
-        Ok(bwatcher)
-        // Ok(FsWatching {
-        //     watch: self,
-        //     // watcher: Foo::W(boxed),
-        // })
+        Ok(FsWatching {
+            watch: self,
+            watcher: boxed,
+        })
     }
 }
 
